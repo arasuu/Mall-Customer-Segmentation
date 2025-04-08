@@ -1,65 +1,45 @@
 import streamlit as st
 import joblib
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Load modelmodel = joblib.load("kmeans_model.pkl")
+# Load model and scaler
+model = joblib.load("kmeans_model.pkl")
 scaler = joblib.load("scaler.pkl")
 
-# Scale input before prediction
-scaled_input = scaler.transform([[income, score]])
-cluster = model.predict(scaled_input)[0]
-
-# Set page config
-st.set_page_config(page_title="Customer Segmentation App", layout="centered")
-
-st.title("🧠 Customer Segmentation using KMeans")
-st.write("Enter a customer's details to predict their segment and visualize their position in the customer base.")
+# App layout
+st.set_page_config(page_title="Customer Segmentation", layout="centered")
+st.title("🧠 Customer Segmentation with KMeans")
+st.write("Enter income and spending score to see which customer segment they fall into.")
 
 # Sidebar inputs
-st.sidebar.header("📝 Input Customer Data")
 income = st.sidebar.slider("Annual Income (k$)", 0, 150, 60)
 score = st.sidebar.slider("Spending Score (1-100)", 1, 100, 50)
 
-# Predict cluster
+# Preprocess input
 input_data = np.array([[income, score]])
-cluster = model.predict(input_data)[0]
+input_scaled = scaler.transform(input_data)
 
-# Display prediction
+# Predict cluster
+cluster = model.predict(input_scaled)[0]
 st.subheader(f"🏷️ Predicted Segment: Cluster {cluster}")
 
-# Optional insights
-cluster_names = {
-    0: "💼 Budget-Conscious",
-    1: "💎 VIP Spenders",
-    2: "📉 Low Value",
-    3: "🛍️ Mid-Tier Spenders",
-    4: "📊 Balanced Customers"
-}
-st.markdown(f"**Segment Insight:** {cluster_names.get(cluster, 'Customer Segment')}")
+# Visualize
+st.subheader("📊 Cluster Visualization (Centers Only)")
 
-# Visualize clusters with user's point
-st.subheader("📊 Cluster Visualization")
+centers = scaler.inverse_transform(model.cluster_centers_)
+centers = np.round(centers, 2)
 
-# Generate example dataset (for demo or if you have df saved, you can load it)
-# Replace with your real data if available
-# df = pd.read_csv("mall_customers.csv")
-# For now, simulate 200 points per cluster center
-df = pd.DataFrame(model.cluster_centers_, columns=["Annual_Income", "Spending_Score"])
-df["Cluster"] = df.index
-
-# Plot
 plt.figure(figsize=(8, 6))
-sns.scatterplot(x="Annual_Income", y="Spending_Score", hue="Cluster", palette="Set2", data=df, s=100)
-plt.scatter(income, score, color="red", s=200, edgecolor="black", label="New Customer")
+sns.scatterplot(x=centers[:, 0], y=centers[:, 1], hue=[f'Cluster {i}' for i in range(len(centers))], palette="Set2", s=200, legend='full')
+plt.scatter(income, score, color='red', s=200, edgecolor='black', label='Your Input')
 plt.xlabel("Annual Income (k$)")
 plt.ylabel("Spending Score (1-100)")
-plt.title("Customer Clusters")
+plt.title("Cluster Centers and Your Customer")
 plt.legend()
 st.pyplot(plt)
 
 # Footer
 st.markdown("---")
-st.caption("Built with 💙 using KMeans and Streamlit")
+st.caption("Built with 🧠 KMeans + Streamlit")
