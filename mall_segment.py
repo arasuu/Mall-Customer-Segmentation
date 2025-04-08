@@ -5,8 +5,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Load model
-model = joblib.load("kmeans_model.pkl")
+# Load modelmodel = joblib.load("kmeans_model.pkl")
+scaler = joblib.load("scaler.pkl")
+
+# Scale input before prediction
+scaled_input = scaler.transform([[income, score]])
+cluster = model.predict(scaled_input)[0]
 
 # Set page config
 st.set_page_config(page_title="Customer Segmentation App", layout="centered")
