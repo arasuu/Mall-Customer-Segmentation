@@ -30,13 +30,6 @@ The dataset `mall_customers.csv` includes the following features:
 
 ---
 
-## 🛠️ How to Run
-
-### 1. Install Requirements
-
-```bash
-pip install -r requirements.txt
-
 📈 Results
 Example output:
 
